@@ -1,0 +1,9 @@
+function [x,y] = mask2roi(mask)
+% SLH
+
+% Coordinates for plotting are different
+tracedROI = double(imfilter(mask,[-1 -1;1 1])|...
+             imfilter(mask,[1 1;-1 -1])|...
+             imfilter(mask,[-1 -1,1 1])|...
+             imfilter(mask,[1 1,-1 -1]));
+[x,y] = find(tracedROI);

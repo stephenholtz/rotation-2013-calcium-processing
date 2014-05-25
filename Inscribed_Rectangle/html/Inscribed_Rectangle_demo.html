@@ -1,0 +1,230 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Tutorial for Inscribed_Rectangle Package</title><meta name="generator" content="MATLAB 7.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-01-06"><meta name="DC.source" content="Inscribed_Rectangle_demo.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>Tutorial for Inscribed_Rectangle Package</h1><!--introduction--><p><b>By Jarek Tuszynski</b></p><p>Inscribed_Rectangle package provides 2 low level computer vision / image analysis functions able to locate largest square or rectangle inscribed inside arbitrary shape defined by a binary mask (black and white image). Only rectangles with vertical/horizontal edges are considered. The functions proved can be used as tools for larger image segmentation problems.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Change History</a></li><li><a href="#2">Licence</a></li><li><a href="#3">Create a mask defining a circle</a></li><li><a href="#4">Run FindLargestSquares and return results.</a></li><li><a href="#5">Use S to find the largest Square inscribed in the circle</a></li><li><a href="#6">Run FindLargestRectangles and return results.</a></li><li><a href="#7">Find the largest Rectangle inscribed in the circle, with size measured by area</a></li><li><a href="#8">Find the largest Rectangle inscribed in the circle with size measured as rectangle circumference with vertical edges having twice the weight of the horizontal edges</a></li><li><a href="#9">Find the largest Rectangle inscribed in the circle with size measured as rectangle circumference with horizontal edges having 3 times the weight of the vertical edges</a></li><li><a href="#10">Load an image of Jenga tower and create a boolean mask of the tower shape.</a></li><li><a href="#11">Use FindLargestRectangles to locate rectangular blocks in the image</a></li></ul></div><h2>Change History<a name="1"></a></h2><div><ul><li>2010-07-07 - original version</li></ul></div><h2>Licence<a name="2"></a></h2><p>The package is distributed under BSD License</p><pre class="codeinput">format <span class="string">compact</span>; <span class="comment">% viewing preference</span>
+clear <span class="string">variables</span>; close <span class="string">all</span>;
+type(<span class="string">'license.txt'</span>)
+</pre><pre class="codeoutput">
+Copyright (c) 2010, Jaroslaw Tuszynski
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are 
+met:
+
+    * Redistributions of source code must retain the above copyright 
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright 
+      notice, this list of conditions and the following disclaimer in 
+      the documentation and/or other materials provided with the distribution
+      
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGE.
+
+</pre><h2>Create a mask defining a circle<a name="3"></a></h2><pre class="codeinput">[X,Y] = meshgrid(-200:200, -200:200);
+BW = (X.^2 + Y.^2)&lt;180^2;
+figure(1); imshow(BW)
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_01.png" alt=""> <h2>Run FindLargestSquares and return results.<a name="4"></a></h2><p>S stores for each pixel the size of the largest all-white square with its upper-left corner at that pixel</p><pre class="codeinput">S = FindLargestSquares(BW);
+imagesc(S); axis <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_02.png" alt=""> <h2>Use S to find the largest Square inscribed in the circle<a name="5"></a></h2><pre class="codeinput">imshow(BW)
+[~, pos] = max(S(:));
+[r c] = ind2sub(size(S), pos);
+rectangle(<span class="string">'Position'</span>,[c,r,S(r,c),S(r,c)], <span class="string">'EdgeColor'</span>,<span class="string">'r'</span>, <span class="string">'LineWidth'</span>,3);
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_03.png" alt=""> <h2>Run FindLargestRectangles and return results.<a name="6"></a></h2><p>C stores for each pixel the area of the largest all-white rectangle with its upper-left corner at that pixel. W and H store width and height of those rectangles</p><pre class="codeinput">[C H W] = FindLargestRectangles(BW, [0 0 1]);
+subplot(2,2,1); imagesc(BW); axis <span class="string">off</span>; axis <span class="string">equal</span>; colormap <span class="string">gray</span>
+title(<span class="string">'Circle mask'</span>);
+subplot(2,2,2); imagesc(H);  axis <span class="string">off</span>; axis <span class="string">equal</span>; colormap <span class="string">gray</span>
+title(<span class="string">'Height of the rectangles'</span>);
+subplot(2,2,3); imagesc(W);  axis <span class="string">off</span>; axis <span class="string">equal</span>; colormap <span class="string">gray</span>
+title(<span class="string">'Width of the rectangles'</span>);
+subplot(2,2,4); imagesc(C);  axis <span class="string">off</span>; axis <span class="string">equal</span>; colormap <span class="string">gray</span>
+title(<span class="string">'Area of the rectangles'</span>);
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_04.png" alt=""> <h2>Find the largest Rectangle inscribed in the circle, with size measured by area<a name="7"></a></h2><pre class="codeinput">close <span class="string">all</span>; imshow(BW)
+[~, pos] = max(C(:));
+[r c] = ind2sub(size(S), pos);
+rectangle(<span class="string">'Position'</span>,[c,r,W(r,c),H(r,c)], <span class="string">'EdgeColor'</span>,<span class="string">'r'</span>, <span class="string">'LineWidth'</span>,3);
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_05.png" alt=""> <h2>Find the largest Rectangle inscribed in the circle with size measured as rectangle circumference with vertical edges having twice the weight of the horizontal edges<a name="8"></a></h2><pre class="codeinput">[C H W] = FindLargestRectangles(BW, [2 1 0]);
+imshow(BW)
+[~, pos] = max(C(:));
+[r c] = ind2sub(size(S), pos);
+rectangle(<span class="string">'Position'</span>,[c,r,W(r,c),H(r,c)], <span class="string">'EdgeColor'</span>,<span class="string">'r'</span>, <span class="string">'LineWidth'</span>,3);
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_06.png" alt=""> <h2>Find the largest Rectangle inscribed in the circle with size measured as rectangle circumference with horizontal edges having 3 times the weight of the vertical edges<a name="9"></a></h2><pre class="codeinput">[C H W] = FindLargestRectangles(BW, [1 3 0]);
+imshow(BW)
+[tmp pos] = max(C(:));
+[r c] = ind2sub(size(S), pos);
+rectangle(<span class="string">'Position'</span>,[c,r,W(r,c),H(r,c)], <span class="string">'EdgeColor'</span>,<span class="string">'r'</span>, <span class="string">'LineWidth'</span>,3);
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_07.png" alt=""> <h2>Load an image of Jenga tower and create a boolean mask of the tower shape.<a name="10"></a></h2><p>Image by "Jason7825" was copied from <a href="http://commons.wikimedia.org/wiki/File:Jenga_arrangement.jpg">http://commons.wikimedia.org/wiki/File:Jenga_arrangement.jpg</a> and is distributed under CC-BY-SA-3.0 &amp; GDFL licenses</p><pre class="codeinput">I = imread(<span class="string">'Jenga_arrangement.jpg'</span>);
+imshow(I)
+BW = rgb2gray(I)&gt;115;
+BW = imfill(BW,<span class="string">'holes'</span>);
+figure(2); imshow(BW)
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_08.png" alt=""> <img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_09.png" alt=""> <h2>Use FindLargestRectangles to locate rectangular blocks in the image<a name="11"></a></h2><pre class="codeinput">imshow(I)
+<span class="keyword">for</span> i = 1:10
+  [C H W] = FindLargestRectangles(BW, [0 10 1]);
+  [tmp pos] = max(C(:));
+  [r c] = ind2sub(size(C), pos);
+  rectangle(<span class="string">'Position'</span>,[c,r,W(r,c),H(r,c)], <span class="string">'EdgeColor'</span>,<span class="string">'r'</span>, <span class="string">'LineWidth'</span>,3);
+  BW( r:(r+H(r,c)-1), c:(c+W(r,c)-1) ) = 0;
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="Inscribed_Rectangle_demo_10.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.12<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Tutorial for Inscribed_Rectangle Package
+% *By Jarek Tuszynski*
+%
+% Inscribed_Rectangle package provides 2 low level computer vision / image  
+% analysis functions able to locate largest square or rectangle inscribed 
+% inside arbitrary shape defined by a binary mask (black and white image). 
+% Only rectangles with vertical/horizontal edges are considered. The 
+% functions proved can be used as tools for larger image segmentation
+% problems.
+%% Change History
+% * 2010-07-07 - original version
+  
+%% Licence
+% The package is distributed under BSD License
+format compact; % viewing preference
+clear variables; close all;
+type('license.txt') 
+
+%% Create a mask defining a circle
+[X,Y] = meshgrid(-200:200, -200:200);                                
+BW = (X.^2 + Y.^2)<180^2; 
+figure(1); imshow(BW)
+
+%% Run FindLargestSquares and return results.
+% S stores for each pixel the size of the largest all-white square
+% with its upper-left corner at that pixel
+S = FindLargestSquares(BW);
+imagesc(S); axis off
+
+%% Use S to find the largest Square inscribed in the circle
+imshow(BW)
+[~, pos] = max(S(:));
+[r c] = ind2sub(size(S), pos);
+rectangle('Position',[c,r,S(r,c),S(r,c)], 'EdgeColor','r', 'LineWidth',3);
+
+%% Run FindLargestRectangles and return results.
+% C stores for each pixel the area of the largest all-white rectangle
+% with its upper-left corner at that pixel. W and H store width and height
+% of those rectangles
+[C H W] = FindLargestRectangles(BW, [0 0 1]);
+subplot(2,2,1); imagesc(BW); axis off; axis equal; colormap gray
+title('Circle mask');
+subplot(2,2,2); imagesc(H);  axis off; axis equal; colormap gray
+title('Height of the rectangles');
+subplot(2,2,3); imagesc(W);  axis off; axis equal; colormap gray
+title('Width of the rectangles');
+subplot(2,2,4); imagesc(C);  axis off; axis equal; colormap gray
+title('Area of the rectangles');
+
+%% Find the largest Rectangle inscribed in the circle, with size measured by area
+close all; imshow(BW)
+[~, pos] = max(C(:));
+[r c] = ind2sub(size(S), pos);
+rectangle('Position',[c,r,W(r,c),H(r,c)], 'EdgeColor','r', 'LineWidth',3);
+
+%% Find the largest Rectangle inscribed in the circle with size measured as rectangle circumference with vertical edges having twice the weight of the horizontal edges
+[C H W] = FindLargestRectangles(BW, [2 1 0]);
+imshow(BW)
+[~, pos] = max(C(:));
+[r c] = ind2sub(size(S), pos);
+rectangle('Position',[c,r,W(r,c),H(r,c)], 'EdgeColor','r', 'LineWidth',3);
+
+%% Find the largest Rectangle inscribed in the circle with size measured as rectangle circumference with horizontal edges having 3 times the weight of the vertical edges
+[C H W] = FindLargestRectangles(BW, [1 3 0]);
+imshow(BW)
+[tmp pos] = max(C(:));
+[r c] = ind2sub(size(S), pos);
+rectangle('Position',[c,r,W(r,c),H(r,c)], 'EdgeColor','r', 'LineWidth',3);
+
+%% Load an image of Jenga tower and create a boolean mask of the tower shape.
+% Image by "Jason7825" was copied from http://commons.wikimedia.org/wiki/File:Jenga_arrangement.jpg and is distributed under CC-BY-SA-3.0 & GDFL licenses
+I = imread('Jenga_arrangement.jpg');
+imshow(I)
+BW = rgb2gray(I)>115;
+BW = imfill(BW,'holes');
+figure(2); imshow(BW)
+
+%% Use FindLargestRectangles to locate rectangular blocks in the image
+imshow(I)
+for i = 1:10
+  [C H W] = FindLargestRectangles(BW, [0 10 1]);
+  [tmp pos] = max(C(:));
+  [r c] = ind2sub(size(C), pos);
+  rectangle('Position',[c,r,W(r,c),H(r,c)], 'EdgeColor','r', 'LineWidth',3);
+  BW( r:(r+H(r,c)-1), c:(c+W(r,c)-1) ) = 0;
+end
+
+##### SOURCE END #####
+--></body></html>

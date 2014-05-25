@@ -3,9 +3,11 @@
 % Eran Mukamel
 % December 1, 2009
 % eran@post.harvard.edu
-    
-fn = 'ArtificialData_SNR_0.1_FOV_250.tif';
 
+addpath(genpath('~/grad_repos/calcium-processing'));
+%fn = 'ArtificialData_SNR_0.1_FOV_250.tif';
+fn = '/Users/stephenholtz/local_data/sabatini/20140430_02/norm_crop_reg_ch1_cw_mctx_002001.tif';
+fInfo = imfinfo(fn);
 %% 1. PCA
 
 nPCs = 100;
@@ -34,13 +36,15 @@ mu = 0.5;
 tlims = [];
 dt = 0.1;
 
+
 figure(2)
-CellsortICAplot('series', ica_filters, ica_sig, movm, tlims, dt, [], [], [1:20]);
+CellsortICAplot('series', ica_filters, ica_sig, movm, tlims, dt, [], [], PCuse);
 
 %% 4a. Segment contiguous regions within ICs
 
 smwidth = 2;
 thresh = 2;
+%thresh = [10 (fInfo(1).Width*fInfo(1).Height)/1.5];
 arealims = 10;
 plotting = 1;
 
@@ -63,4 +67,4 @@ normalization = 1;
 %% Show results
 
 figure(2)
-CellsortICAplot('series', ica_filters, ica_sig, movm, tlims, dt, 1, 2, [1:20], spt, spc);
+CellsortICAplot('series', ica_filters, ica_sig, movm, tlims, dt, 1, 2, PCuse, spt, spc);
